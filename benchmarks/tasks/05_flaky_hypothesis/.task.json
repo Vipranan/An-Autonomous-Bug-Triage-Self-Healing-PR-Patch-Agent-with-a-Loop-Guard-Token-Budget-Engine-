@@ -1,0 +1,24 @@
+{
+  "name": "05_flaky_hypothesis",
+  "description": "Multi-hypothesis scenario requiring hypothesis pivot after failure",
+  "prompt": "Fix failing test_handle in test_flaky.py",
+  "log_snippet": "FAIL: test_handle (test_flaky.TestFlaky)\nAssertionError: 'hello' != 'HELLO'",
+  "test_cmd": "python3 -m unittest test_flaky.py",
+  "hypotheses": [
+    {
+      "hypothesis": "Hypothesis 1: Patch wrapper.py to force capitalize",
+      "file": "wrapper.py",
+      "action_signature": "edit wrapper.py: handle() return process(data).capitalize()",
+      "patch": "from core import process\n\ndef handle(data):\n    return process(data).capitalize()\n"
+    },
+    {
+      "hypothesis": "Hypothesis 2: Fix root cause in core.py to return upper()",
+      "file": "core.py",
+      "action_signature": "edit core.py: process() return data.strip().upper()",
+      "patches": {
+        "wrapper.py": "from core import process\n\ndef handle(data):\n    return process(data)\n",
+        "core.py": "def process(data):\n    return data.strip().upper()\n"
+      }
+    }
+  ]
+}

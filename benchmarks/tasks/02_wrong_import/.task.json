@@ -1,0 +1,15 @@
+{
+  "name": "02_wrong_import",
+  "description": "Module import error with mismatched helper function name",
+  "prompt": "Fix ImportError in service.py",
+  "log_snippet": "ImportError: cannot import name 'compute_total' from 'helper' (service.py:1)",
+  "test_cmd": "python3 -m unittest test_service.py",
+  "hypotheses": [
+    {
+      "hypothesis": "Correct import from helper to calculate_total",
+      "file": "service.py",
+      "action_signature": "edit service.py:line 1 update import to calculate_total",
+      "patch": "from helper import calculate_total\n\ndef get_bill(items):\n    return calculate_total(items)\n"
+    }
+  ]
+}

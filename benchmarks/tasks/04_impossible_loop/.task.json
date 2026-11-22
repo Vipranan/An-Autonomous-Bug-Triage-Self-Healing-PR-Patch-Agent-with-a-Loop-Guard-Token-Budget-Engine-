@@ -1,0 +1,15 @@
+{
+  "name": "04_impossible_loop",
+  "description": "Contradictory test case that repeatedly fails with identical error",
+  "prompt": "Fix failing assertion in test_logic.py",
+  "log_snippet": "AssertionError: False is not true : Contradictory requirement: value cannot be both A and B",
+  "test_cmd": "python3 -m unittest test_logic.py",
+  "hypotheses": [
+    {
+      "hypothesis": "Return string A in logic.py",
+      "file": "logic.py",
+      "action_signature": "edit logic.py: set return to 'A'",
+      "patch": "def compute():\n    return 'A'\n"
+    }
+  ]
+}

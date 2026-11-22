@@ -1,0 +1,15 @@
+{
+  "name": "01_broken_assertion",
+  "description": "Failing arithmetic assertion in addition function",
+  "prompt": "Fix failing assertion in calc.py add function",
+  "log_snippet": "FAIL: test_add (test_calc.TestCalc)\nAssertionError: -1 != 5",
+  "test_cmd": "python3 -m unittest test_calc.py",
+  "hypotheses": [
+    {
+      "hypothesis": "Fix operator in add() from subtraction to addition",
+      "file": "calc.py",
+      "action_signature": "edit calc.py:line 2 replace - with +",
+      "patch": "def add(a, b):\n    return a + b\n"
+    }
+  ]
+}

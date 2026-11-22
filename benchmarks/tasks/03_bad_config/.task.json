@@ -1,0 +1,15 @@
+{
+  "name": "03_bad_config",
+  "description": "Invalid negative timeout value in configuration file",
+  "prompt": "Fix invalid configuration in config.json",
+  "log_snippet": "ValueError: timeout must be positive (app.py:8 in load_settings)",
+  "test_cmd": "python3 -m unittest test_app.py",
+  "hypotheses": [
+    {
+      "hypothesis": "Set timeout to positive integer in config.json",
+      "file": "config.json",
+      "action_signature": "edit config.json: set timeout to 30",
+      "patch": "{\n  \"timeout\": 30,\n  \"max_retries\": 3\n}\n"
+    }
+  ]
+}
