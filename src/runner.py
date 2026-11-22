@@ -12,6 +12,7 @@ import os
 from pathlib import Path
 import shutil
 import subprocess
+import sys
 import tempfile
 import time
 from typing import List, Optional, Sequence, Union
@@ -19,6 +20,26 @@ from typing import List, Optional, Sequence, Union
 
 class PathTraversalError(PermissionError):
     """Raised when an operation attempts to access a path outside the workspace boundary."""
+
+
+def normalize_command(cmd: Union[str, Sequence[str]]) -> Union[str, List[str]]:
+    """Normalize command across platforms (WSL, macOS, Windows).
+
+    Substitutes 'python3' or 'python' with the active runtime executable (sys.executable)
+    so subprocess calls succeed regardless of OS PATH configuration.
+    """
+    py_exec = f'"{sys.executable}"' if " " in sys.executable else sys.executable
+    if isinstance(cmd, str):
+        trimmed = cmd.strip()
+        parts = trimmed.split(maxsplit=1)
+        if parts and parts[0] in ("python3", "python"):
+            return f"{py_exec} {parts[1]}" if len(parts) > 1 else py_exec
+        return cmd
+    elif isinstance(cmd, (list, tuple)) and cmd:
+        if cmd[0] in ("python3", "python"):
+            return [sys.executable, *cmd[1:]]
+        return list(cmd)
+    return cmd
 
 
 @dataclass
@@ -116,12 +137,13 @@ def run_command(
     Returns:
         CommandResult with captured output, timing, and truncation flags.
     """
-    use_shell = isinstance(cmd, str)
+    cmd_normalized = normalize_command(cmd)
+    use_shell = isinstance(cmd_normalized, str)
     start_time = time.monotonic()
 
     try:
         proc = subprocess.run(
-            cmd,
+            cmd_normalized,
             cwd=str(cwd) if cwd else None,
             shell=use_shell,
             capture_output=True,

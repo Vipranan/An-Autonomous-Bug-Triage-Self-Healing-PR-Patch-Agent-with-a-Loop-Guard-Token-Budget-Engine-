@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 import os
+from pathlib import Path
 import re
 from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Union
 
@@ -129,15 +130,16 @@ def _extract_log_signals(
         log_snippet,
     )
     for path, line_no, func in file_matches:
-        # Exclude standard library/virtualenv paths if project files exist
-        if "/lib/python" not in path and "/site-packages/" not in path:
-            norm_path = os.path.normpath(path)
+        # Exclude standard library/virtualenv paths across POSIX and Windows
+        lower_path = path.replace("\\", "/").lower()
+        if "/lib/python" not in lower_path and "/site-packages/" not in lower_path:
+            norm_path = Path(path).as_posix()
             if norm_path not in traceback_files:
                 traceback_files.append(norm_path)
 
     # If all were site-packages, keep all matches
     if not traceback_files and file_matches:
-        traceback_files = [os.path.normpath(m[0]) for m in file_matches]
+        traceback_files = [Path(m[0]).as_posix() for m in file_matches]
 
     signals["traceback_files"] = traceback_files
 

@@ -3,6 +3,6 @@
   "description": "Vague 'fix this' prompt without logs, diffs, or targets",
   "prompt": "fix this",
   "log_snippet": "",
-  "test_cmd": "python3 -c 'exit(1)'",
+  "test_cmd": "python3 -c \"import sys; sys.exit(1)\"",
   "hypotheses": []
 }

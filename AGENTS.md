@@ -1,26 +1,30 @@
 # AGENTS.md
 
 ## Project Goals
-**PatchGuard** is a CLI-based autonomous bug-triage and self-healing patch runner equipped with:
-- Automated bug triage and hypothesis generation from issue reports and test failures.
+**PatchGuard** is a cross-platform CLI autonomous bug-triage and self-healing patch runner equipped with:
+- Automated bug triage and hypothesis generation from issue reports, diffs, and test traces.
 - Iterative, self-healing patch synthesis and validation against regression test suites.
-- Built-in **Loop Guard** engine capping retry attempts and preventing recursive agent thrashing.
+- Built-in **Loop Guard** engine capping retries (max 2 attempts per hypothesis) and stopping repetitive thrashing.
 - Token and context budget tracking to avoid unbounded LLM usage and cost runaways.
 
-## WSL Development Conventions
-- **Environment**: Linux environment hosted on WSL (Ubuntu). All scripts and operations must use standard Unix paths and bash utilities.
-- **Line Endings & Formatting**: Enforce Unix line endings (`LF`). Do not commit Windows `CRLF` line endings.
-- **File Permissions**: Maintain standard Linux file permissions; ensure executable scripts have appropriate permissions (`chmod +x`).
-- **Python Runtime**: Python 3.10+ (using `python3` or virtual environments in `.venv`).
+## Cross-Platform Conventions (WSL, macOS, Windows)
+- **WSL (Ubuntu / Linux)**: Standard POSIX paths (`~/projects/patchguard`). Shell: `bash` / `zsh`.
+- **macOS (Terminal / iTerm2)**: Unix paths (`/Users/<user>/projects/patchguard`). Shell: `zsh` / `bash`.
+- **Windows (PowerShell / Windows Terminal)**: Native Windows paths (`C:\dev\patchguard`). Shell: `powershell.exe` / `pwsh`.
+- **Path Portability**: Always use `pathlib.Path` or `os.path` rather than hardcoding `/tmp` or backslashes.
+- **Line Endings**: Enforce standard `LF` line endings across all platforms (`git config core.autocrlf input`).
+- **Python Executable**: Python 3.10+ invoked via `python3` (WSL/macOS) or `python` (Windows PowerShell).
 
-## Exact Test & Lint Commands
-- **Run Tests (Standard Library - zero external dependencies required)**:
+## Exact Test & Benchmark Commands
+- **WSL & macOS**:
   ```bash
   python3 -m unittest discover -s tests -p "test_*.py"
+  python3 benchmarks/run_eval.py
   ```
-- **Run Tests (pytest - when dev dependencies are installed)**:
-  ```bash
-  pytest tests/
+- **Windows (PowerShell)**:
+  ```powershell
+  python -m unittest discover -s tests -p "test_*.py"
+  python benchmarks/run_eval.py
   ```
 - **Lint & Format Check**:
   ```bash
@@ -29,7 +33,7 @@
   ```
 
 ## Guardrails
-- **Scoped Edits**: Keep changes minimal and laser-focused on the targeted bug or task. Never perform unsolicited broad refactoring.
+- **Scoped Edits**: Keep changes minimal and laser-focused on the targeted bug. Never perform unsolicited broad refactoring.
 - **Secrets & Sensitive Data**: NEVER inspect, read, modify, or commit secrets, credentials, API keys, `.env`, or `.env.*` files.
-- **Narrow Checks**: Prefer targeted file reads (specific line ranges) and isolated unit/regression test runs over broad full-repo scans or heavy test suites.
+- **Narrow Checks**: Prefer targeted file reads and isolated unit test runs over broad full-repo scans.
 - **Loop Guard Compliance**: Adhere strictly to the hypothesis retry cap (max 2 attempts per hypothesis) and token budget limits defined in `.agents/rules/loop-guard.md`.

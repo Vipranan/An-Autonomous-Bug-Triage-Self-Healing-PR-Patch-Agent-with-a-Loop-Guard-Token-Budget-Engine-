@@ -5,7 +5,7 @@
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![Zero External Dependencies](https://img.shields.io/badge/Dependencies-Standard%20Library-green.svg)](pyproject.toml)
 [![Tests Passing](https://img.shields.io/badge/Tests-25%2F25%20Passing-brightgreen.svg)](tests/)
-[![WSL Ready](https://img.shields.io/badge/WSL-Ubuntu%2FLinux-purple.svg)](AGENTS.md)
+[![Cross-Platform](https://img.shields.io/badge/Platforms-WSL%20%7C%20macOS%20%7C%20Windows-purple.svg)](AGENTS.md)
 
 ---
 
@@ -59,28 +59,49 @@ Autonomous code-repair agents frequently enter **destructive retry loops** when 
 
 ---
 
-## ⚙️ Quickstart (WSL / Linux)
+## ⚙️ Cross-Platform Quickstart
 
-PatchGuard is self-contained and runs on Linux/WSL using standard library Python (zero external pip packages required).
+PatchGuard requires **zero external pip packages** and runs on Python 3.10+ across Linux, macOS, and native Windows.
 
+### 1. WSL (Ubuntu / Linux)
 ```bash
-# 1. Clone repository and navigate to root
-git clone <repo_url> && cd <repo_name>
+# Path convention: ~/projects/patchguard
+cd ~/projects/patchguard
 
-# 2. Run test suite (25 tests across all modules)
+# Run test suite (25 tests)
 python3 -m unittest discover -s tests -p "test_*.py" -v
 
-# 3. Run benchmark evaluation suite (Guarded vs. Unguarded comparison)
+# Run benchmark evaluation suite
 python3 benchmarks/run_eval.py
+
+# Run CLI on target repository
+python3 -m src.cli run --repo benchmarks/tasks/01_broken_assertion --prompt "Fix failing assertion in calc.py"
 ```
 
-### CLI Commands
+### 2. macOS (Terminal / iTerm2)
 ```bash
-# Run self-healing triage on a target repo in Guarded mode (default)
-python3 -m src.cli run --repo benchmarks/tasks/01_broken_assertion --prompt "Fix failing assertion in calc.py"
+# Path convention: /Users/<user>/projects/patchguard
+cd ~/projects/patchguard
 
-# Run side-by-side comparison on a task to observe loop prevention
+# Run test suite & benchmark suite
+python3 -m unittest discover -s tests -p "test_*.py" -v
+python3 benchmarks/run_eval.py
+
+# Run side-by-side comparison on a task
 python3 -m src.cli compare --repo benchmarks/tasks/04_impossible_loop --prompt "Fix failing test"
+```
+
+### 3. Windows (PowerShell / Windows Terminal)
+```powershell
+# Path convention: C:\dev\patchguard
+Set-Location C:\dev\patchguard
+
+# Run test suite & benchmark suite
+python -m unittest discover -s tests -p "test_*.py" -v
+python benchmarks/run_eval.py
+
+# Run CLI on target repository
+python -m src.cli run --repo benchmarks\tasks\01_broken_assertion --prompt "Fix failing assertion in calc.py"
 ```
 
 ---

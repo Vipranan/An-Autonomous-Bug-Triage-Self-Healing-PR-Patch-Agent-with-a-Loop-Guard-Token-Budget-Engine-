@@ -2,6 +2,7 @@
 
 import os
 from pathlib import Path
+import sys
 import tempfile
 import unittest
 
@@ -41,8 +42,11 @@ class TestRunner(unittest.TestCase):
             resolve_safe_path(self.base_dir, "sub/../../outside.txt")
 
         # Absolute traversal outside base
+        outside_abs = Path(tempfile.gettempdir()).resolve().parent
+        if outside_abs == self.base_dir.resolve():
+            outside_abs = outside_abs.parent
         with self.assertRaises(PathTraversalError):
-            resolve_safe_path(self.base_dir, "/etc/passwd")
+            resolve_safe_path(self.base_dir, outside_abs)
 
         with self.assertRaises(PathTraversalError):
             safe_read_file(self.base_dir, "../outside.txt")
@@ -68,7 +72,11 @@ class TestRunner(unittest.TestCase):
 
     def test_run_command_success_and_capture(self):
         """Verify normal command execution capturing stdout, stderr, and returncode."""
-        result = run_command("python3 -c 'import sys; print(\"stdout test\"); sys.stderr.write(\"stderr test\\n\")'")
+        result = run_command([
+            sys.executable,
+            "-c",
+            "import sys; sys.stdout.write('stdout test\\n'); sys.stderr.write('stderr test\\n')",
+        ])
         self.assertEqual(result.returncode, 0)
         self.assertIn("stdout test", result.stdout)
         self.assertIn("stderr test", result.stderr)
@@ -79,7 +87,7 @@ class TestRunner(unittest.TestCase):
     def test_run_command_timeout(self):
         """Verify execution times out cleanly without hanging."""
         # Sleep for 5 seconds with a 0.5s timeout
-        result = run_command("python3 -c 'import time; time.sleep(5)'", timeout_sec=0.5)
+        result = run_command([sys.executable, "-c", "import time; time.sleep(5)"], timeout_sec=0.5)
         self.assertTrue(result.timed_out)
         self.assertEqual(result.returncode, -1)
         self.assertIn("Command timed out", result.stderr)
@@ -88,7 +96,7 @@ class TestRunner(unittest.TestCase):
     def test_run_command_output_truncation(self):
         """Verify oversized stdout/stderr is truncated symmetrically to protect token budgets."""
         # Generate 20,000 characters
-        cmd = "python3 -c 'print(\"A\" * 20000)'"
+        cmd = [sys.executable, "-c", "print('A' * 20000)"]
         result = run_command(cmd, max_output_chars=500)
         self.assertEqual(result.returncode, 0)
         self.assertTrue(result.truncated)
